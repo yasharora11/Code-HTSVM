@@ -1,7 +1,7 @@
 import numpy as np
 from numpy import linalg as LA
 
-def fit(A, B, y, lambda2):
+def fit(A, B, y, C,lambda1,delta):
     """
     Fits a model to training data
     
@@ -9,8 +9,9 @@ def fit(A, B, y, lambda2):
     A : Patterns from the positive class (+1).
     B : Patterns from the negative class (-1).
     y : Label (+1 or -1).
-    lambda2 : Regularization parameter for L1 norm.
-    lambda1, lambda3, lambda4: Initialize to 1 (you can set accordingly)
+    C : Penalty parameter
+    lambda1 : Regularization parameter for L1 norm.
+    lambda2, lambda3: Initialize to 1 
 
     Returns:
     w : Weight vector of the classifier.
@@ -22,8 +23,8 @@ def fit(A, B, y, lambda2):
     e = np.ones(m2)
 
     # Regularization constants and initialization
-    lambda1, lambda3, lambda4 = 1, 1, 1
-    delta, t0 = 0.0001, 1
+    lambda2, lambda3 = 1, 1
+    t0 = 1
     p = []
     b0 = 0
     w0 = np.zeros(n)
@@ -31,9 +32,10 @@ def fit(A, B, y, lambda2):
     F0 = m * (1 - delta / 2)
 
     # Lipschitz constants
-    L_f1 = (1 / delta) * sum([1 + np.inner(B[i], B[i]) for i in range(m)])
-    L_f2 = lambda1 * sum([1 + np.inner(A[i], A[i]) for i in range(m2)])
-    L0 = (2 * (L_f1 + L_f2)) / n
+    L_f1 = (C / delta) * sum([1 + np.inner(B[i], B[i]) for i in range(m)])
+    L_f2 = sum([1 + np.inner(A[i], A[i]) for i in range(m2)])
+    L_f=L_f1+L_f2
+    L0 = (2 *L_f) / n
 
     cn, k = 0, 0
 
@@ -66,13 +68,13 @@ def fit(A, B, y, lambda2):
         L = 1.2 * L0
 
         # Bias update
-        b = (L * bcap - f1gradb.sum() - f2gradb.sum()) / (L + lambda4)
+        b = (L * bcap - f1gradb.sum() - f2gradb.sum()) / (L + lambda3)
 
         # Weight update via soft-thresholding (proximal operator)
         s1 = L * wcap - f1gradw.sum(axis=0) - f2gradw.sum(axis=0)
-        s2 = np.maximum(np.abs(s1) - lambda2, 0)
+        s2 = np.maximum(np.abs(s1) - lambda1, 0)
         s = np.sign(s1) * s2
-        w = s / (L + lambda3)
+        w = s / (L + lambda2)
 
         # Objective function
         phi = np.array([
@@ -82,10 +84,10 @@ def fit(A, B, y, lambda2):
             for j in range(m)
         ])
         f1 = phi.sum()
-        f2 = (lambda1 / 2) * sum([(b + A[j] @ w)**2 for j in range(m2)])
-        f = f1 + f2
+        f2 = (1 / 2) * sum([(b + A[j] @ w)**2 for j in range(m2)])
+        f = (C *f1) + f2
 
-        g = lambda2 * LA.norm(w, 1) + (lambda3 / 2) * LA.norm(w)**2 + (lambda4 / 2) * b**2
+        g = lambda1 * LA.norm(w, 1) + (lambda2 / 2) * LA.norm(w)**2 + (lambda3 / 2) * b**2
         F = f + g
 
         omega = min(t0 / t, np.sqrt(L0 / L))
