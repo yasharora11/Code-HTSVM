@@ -8,7 +8,7 @@ import os
 
 # Config
 DATA_PATH = 'data/Hepatitis.xlsx'
-OUTPUT_FILE = 'results/HTSVM_varying_delta.xlsx'
+OUTPUT_FILE = 'data/HTSVM_varying_delta.xlsx'
 C = 1
 lambda_val = 0.1
 delta_values = [10**(-i) for i in range(1, 5)]  # [0.1, 0.01, 0.001, 0.0001]
