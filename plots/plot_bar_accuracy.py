@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
-# Load the Excel file (you can adjust the path as needed)
+# Load the Excel file (generate this file by running the code under analysis section)
 df = pd.read_excel('data/HTSVM_varying_delta_lambda.xlsx')
 
 # Extract the delta values and accuracies
